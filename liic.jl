@@ -38,8 +38,9 @@ function xyz2matrix(input_xyz)
     return just_coords
 end
 
-function cartesian_interpolation()
-    println("Performing cartesian interpolation...")
+function cartesian_interpolation(inMat1,inMat2,steps)
+    difMat = (inMat2 - inMat1) / steps
+    return difMat
 end
 
 function distance_interpolation()
@@ -52,12 +53,15 @@ end
 
 function main()
     parsed_args = parse_args(ARGS, parse_settings)
-    geometry = parsed_args["geom1"]
-    println(geometry)
+    stp = parsed_args["steps"]
+    in_file_1 = parsed_args["geom1"]
+    in_file_2 = parsed_args["geom2"]
     if parsed_args["cartesian"]
-        cartesian_interpolation()
-        input_matrix_a = xyz2matrix(parsed_args["geom1"])
-        # show(input_matrix_a)
+        println("Performing cartesian interpolation...")
+        in_mat_1 = xyz2matrix(in_file_1)
+        in_mat_2 = xyz2matrix(in_file_2)
+        foo = cartesian_interpolation(in_mat_1,in_mat_2,stp)
+        show(foo)
     elseif parsed_args["distance"]
         println("Performing interpolation in internal distance matrix...")
     elseif parsed_args["internal"]
