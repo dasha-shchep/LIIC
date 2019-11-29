@@ -1,10 +1,13 @@
 # Julia LIIC Script
 # Written on 26 November 2019
-# Execute by running `julia liic.jl`
+# Execute by running `julia liic.jl --flags path_to_geom1 path_to_geom2`
 
 using DelimitedFiles
 using LinearAlgebra
 using ArgParse
+
+include("Interpol.jl")
+import .Interpol
 
 parse_settings = ArgParseSettings()
 
@@ -38,10 +41,11 @@ function xyz2matrix(input_xyz)
     return just_coords
 end
 
-function cartesian_interpolation(inMat1,inMat2,steps)
-    difMat = (inMat2 - inMat1) / steps
-    return difMat
-end
+# function cartesian_interpolation(inMat1,inMat2,steps)
+#     # For an N atom system, this function returns an N x nsteps x 3 array
+#     difMat = (inMat2 - inMat1) / (steps - 1)
+#     return difMat
+# end
 
 function distance_interpolation()
     println("execute dii")
@@ -60,7 +64,7 @@ function main()
         println("Performing cartesian interpolation...")
         in_mat_1 = xyz2matrix(in_file_1)
         in_mat_2 = xyz2matrix(in_file_2)
-        foo = cartesian_interpolation(in_mat_1,in_mat_2,stp)
+        foo = Interpol.cartesian_interpolation(in_mat_1,in_mat_2,stp)
         show(foo)
     elseif parsed_args["distance"]
         println("Performing interpolation in internal distance matrix...")
