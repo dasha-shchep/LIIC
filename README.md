@@ -1,7 +1,6 @@
 # Linear interpolation of internal coordinates in Julia
 Execute by running `julia liic.jl --flags path_to_geom1 path_to_geom2`
 
-Cloned from home
 Flags:
 
 `--cartesian`/`-c` LIIC in cartesian coordinates: default
