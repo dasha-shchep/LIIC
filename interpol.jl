@@ -9,9 +9,15 @@ export internal
 export xyz2matrix
 
 function cartesian(inMat1,inMat2,steps)
-    # For an N atom system, this function returns an N x nsteps x 3 array
+    # For an N atom system, this function returns an N x 3 x nsteps array
     difMat = (inMat2 - inMat1) / (steps - 1)
-    interpollatedArray = Array{Float64,3}
+    natoms = size(difMat)[1]
+    interpollatedArray = Array{Float64,3}(undef,natoms,3,steps)
+    for i in 0:(steps - 1)
+        interpollatedArray[:,:,i+1] = inMat1 + i * difMat
+    end
+    show(inMat2)
+    show(interpollatedArray[:,:,steps])
     return interpollatedArray
 end
 
