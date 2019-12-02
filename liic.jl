@@ -42,7 +42,6 @@ function main()
         in_mat_1 = Interpol.xyz2matrix(in_file_1)
         in_mat_2 = Interpol.xyz2matrix(in_file_2)
         foo = Interpol.cartesian(in_mat_1,in_mat_2,stp)
-        show(foo)
     elseif parsed_args["distance"]
         println("Performing interpolation in internal distance matrix...")
     elseif parsed_args["internal"]

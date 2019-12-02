@@ -11,8 +11,8 @@ export xyz2matrix
 function cartesian(inMat1,inMat2,steps)
     # For an N atom system, this function returns an N x nsteps x 3 array
     difMat = (inMat2 - inMat1) / (steps - 1)
-    
-    return difMat
+    interpollatedArray = Array{Float64,3}
+    return interpollatedArray
 end
 
 function distance()
