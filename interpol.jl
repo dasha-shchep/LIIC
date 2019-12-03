@@ -7,6 +7,7 @@ export cartesian
 export distance
 export internal
 export xyz2matrix
+export writeFile
 
 function cartesian(inMat1,inMat2,steps)
     # For an N atom system, this function returns an N x 3 x nsteps array
@@ -27,6 +28,10 @@ end
 
 function internal()
     println("execute iii")
+end
+
+function writeFile(output_array)
+    return size(output_array)[3]
 end
 
 function xyz2matrix(input_xyz)

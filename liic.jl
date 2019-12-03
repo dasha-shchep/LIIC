@@ -5,6 +5,8 @@
 using LinearAlgebra
 using ArgParse
 
+using DelimitedFiles
+
 include("interpol.jl")
 import .Interpol
 
@@ -41,7 +43,7 @@ function main()
         println("Performing cartesian interpolation...")
         in_mat_1 = Interpol.xyz2matrix(in_file_1)
         in_mat_2 = Interpol.xyz2matrix(in_file_2)
-        @time Interpol.cartesian(in_mat_1,in_mat_2,20)
+        outputArray = Interpol.cartesian(in_mat_1,in_mat_2,20)
     elseif parsed_args["distance"]
         println("Performing interpolation in internal distance matrix...")
     elseif parsed_args["internal"]
@@ -50,11 +52,13 @@ function main()
         println("what")
     end
 
-    # println(parsed_args["cartesian"])
-    # println("Parsed args:")
-    # for (arg,val) in parsed_args
-    #     println("  $arg  =>  $val")
-    # end
+    scanLength = size(outputArray)[3]
+    open("filename.txt","w") do io
+        writedlm(io, outputArray[:,:,1],'\t')
+    end
+
+    # println(Interpol.writeFile(outputArray))
+
 end
 
 # Off we ... off we ... off we fucking GO!
