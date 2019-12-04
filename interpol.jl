@@ -17,8 +17,6 @@ function cartesian(inMat1,inMat2,steps)
     for i in 0:(steps - 1)
         interpollatedArray[:,:,i+1] = inMat1 + i * difMat
     end
-    show(inMat2)
-    show(interpollatedArray[:,:,steps])
     return interpollatedArray
 end
 
@@ -31,7 +29,13 @@ function internal()
 end
 
 function writeFile(output_array)
-    return size(output_array)[3]
+    scanLength = size(output_array)[3]
+    open("filename.txt","w") do io
+        for i in scanLength
+            show(output_array[:,:,i])
+            writedlm(io,output_array[:,:,i])
+        end
+    end
 end
 
 function xyz2matrix(input_xyz)

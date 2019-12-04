@@ -43,7 +43,7 @@ function main()
         println("Performing cartesian interpolation...")
         in_mat_1 = Interpol.xyz2matrix(in_file_1)
         in_mat_2 = Interpol.xyz2matrix(in_file_2)
-        outputArray = Interpol.cartesian(in_mat_1,in_mat_2,20)
+        outputArray = Interpol.cartesian(in_mat_1,in_mat_2,stp)
     elseif parsed_args["distance"]
         println("Performing interpolation in internal distance matrix...")
     elseif parsed_args["internal"]
@@ -52,9 +52,15 @@ function main()
         println("what")
     end
 
+    f = "filename.txt"
     scanLength = size(outputArray)[3]
-    open("filename.txt","w") do io
-        writedlm(io, outputArray[:,:,1],'\t')
+    open(f,"w") do io
+        for i in 1:scanLength
+            show(outputArray[:,:,i])
+
+            writedlm(io, outputArray[:,:,i])
+        end
+    # close(f)
     end
 
     # println(Interpol.writeFile(outputArray))
