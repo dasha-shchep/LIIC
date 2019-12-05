@@ -53,17 +53,8 @@ function main()
     end
 
     f = "filename.txt"
-    scanLength = size(outputArray)[3]
-    open(f,"w") do io
-        for i in 1:scanLength
-            show(outputArray[:,:,i])
 
-            writedlm(io, outputArray[:,:,i])
-        end
-    # close(f)
-    end
-
-    # println(Interpol.writeFile(outputArray))
+    Interpol.writeFile(outputArray,f)
 
 end
 

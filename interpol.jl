@@ -28,14 +28,21 @@ function internal()
     println("execute iii")
 end
 
-function writeFile(output_array)
+function writeFile(output_array,file)
     scanLength = size(output_array)[3]
-    open("filename.txt","w") do io
-        for i in scanLength
+    open(file,"w") do io
+        for i in 1:scanLength
             show(output_array[:,:,i])
-            writedlm(io,output_array[:,:,i])
+            writedlm(io, output_array[:,:,i])
         end
     end
+    # scanLength = size(output_array)[3]
+    # open("filename.txt","w") do io
+    #     for i in scanLength
+    #         show(output_array[:,:,i])
+    #         writedlm(io,output_array[:,:,i])
+    #     end
+    # end
 end
 
 function xyz2matrix(input_xyz)
