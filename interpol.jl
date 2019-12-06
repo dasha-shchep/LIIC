@@ -45,7 +45,7 @@ function xyz2matrix(input_xyz)
     # Imports .xyz file format as data frame, converts it to an N x 3 Matrix
     raw_xyz =   readdlm(input_xyz)
     natoms  =   size(raw_xyz)[1]
-    just_coords = Array{Float64}(raw_xyz[2:natoms,2:4])
+    just_coords = Array{Float64}(raw_xyz[2:end,2:4])
     return just_coords
 end
 
