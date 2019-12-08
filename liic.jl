@@ -49,14 +49,16 @@ function main()
         println("Performing interpolation in internal distance matrix...")
     elseif parsed_args["internal"]
         println("Performing interpolation in internal coordinates...")
-		Interpol.internal(in_vec_1,in_vec_2,stp)
+		internalCoords = Interpol.xyz2internal(in_file_1)
+		show(internalCoords[:,2].*2)
+		# Interpol.internal(in_vec_1,in_vec_2,stp)
     else
         println("what")
     end
 
     f = "filename.xyz"
 
-    Interpol.writeFile(outputArray,atomNames1,f)
+    # Interpol.writeFile(outputArray,atomNames1,f)
 
 end
 

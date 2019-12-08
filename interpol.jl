@@ -22,6 +22,7 @@ end
 
 function internal()
     println("execute iii")
+
 end
 
 function writeFile(output_array,atom_names,file)
@@ -44,6 +45,15 @@ function xyz2matrix(input_xyz)
     just_coords = Array{Float32}(raw_xyz[2:end,2:4])
     atom_names = Array{String}(raw_xyz[2:end,1])
     return just_coords, atom_names
+end
+
+function xyz2internal(input_xyz)
+    # Imports .xyz file format to zmat, returns internal coord vector
+    babel_zmat = read(`obabel -ixyz $(input_xyz) -ogzmat`,String)
+    regexmatch = match(r"Variables:",babel_zmat)
+	segment_zmat = babel_zmat[regexmatch.offset:end]
+	internals_array = readdlm(IOBuffer(segment_zmat),skipstart=1)
+    return internals_array
 end
 
 end
