@@ -41,8 +41,9 @@ function main()
     in_file_2 = parsed_args["geom2"]
     if parsed_args["cartesian"]
         println("Performing cartesian interpolation...")
-        in_mat_1 = Interpol.xyz2matrix(in_file_1)
-        in_mat_2 = Interpol.xyz2matrix(in_file_2)
+        in_mat_1, atomNames1 = Interpol.xyz2matrix(in_file_1)
+        in_mat_2, atomNames2 = Interpol.xyz2matrix(in_file_2)
+	@assert atomNames1 == atomNames2
         outputArray = Interpol.cartesian(in_mat_1,in_mat_2,stp)
     elseif parsed_args["distance"]
         println("Performing interpolation in internal distance matrix...")
@@ -52,9 +53,9 @@ function main()
         println("what")
     end
 
-    f = "filename.txt"
+    f = "filename.xyz"
 
-    Interpol.writeFile(outputArray,f)
+    Interpol.writeFile(outputArray,atomNames1,f)
 
 end
 

@@ -24,15 +24,15 @@ function internal()
     println("execute iii")
 end
 
-function writeFile(output_array,file)
+function writeFile(output_array,atom_names,file)
     scanLength = size(output_array)[3]
     atom_number = size(output_array)[1]
-    println(typeof(atom_number))
     open(file,"w") do io
         for i in 1:scanLength
+	    geometry = hcat(atom_names,output_array[:,:,i])
             write(io, string(atom_number))
             writedlm(io, "\n")
-            writedlm(io, output_array[:,:,i],'\t')
+            writedlm(io, geometry,'\t')
         end
     end
 end
@@ -42,7 +42,8 @@ function xyz2matrix(input_xyz)
     raw_xyz =   readdlm(input_xyz)
     natoms  =   size(raw_xyz)[1]
     just_coords = Array{Float32}(raw_xyz[2:end,2:4])
-    return just_coords
+    atom_names = Array{String}(raw_xyz[2:end,1])
+    return just_coords, atom_names
 end
 
 end
