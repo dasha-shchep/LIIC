@@ -43,12 +43,13 @@ function main()
         println("Performing cartesian interpolation...")
         in_mat_1, atomNames1 = Interpol.xyz2matrix(in_file_1)
         in_mat_2, atomNames2 = Interpol.xyz2matrix(in_file_2)
-	@assert atomNames1 == atomNames2
+		@assert atomNames1 == atomNames2
         outputArray = Interpol.cartesian(in_mat_1,in_mat_2,stp)
     elseif parsed_args["distance"]
         println("Performing interpolation in internal distance matrix...")
     elseif parsed_args["internal"]
         println("Performing interpolation in internal coordinates...")
+		Interpol.internal(in_vec_1,in_vec_2,stp)
     else
         println("what")
     end
