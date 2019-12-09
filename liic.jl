@@ -52,7 +52,7 @@ function main()
 		internalCoords1,header = Interpol.xyz2internal(in_file_1)
 		internalCoords2,header = Interpol.xyz2internal(in_file_2)
 		@assert internalCoords1[:,1] == internalCoords2[:,1]
-		Interpol.internal(internalCoords1,internalCoords2,stp,header)
+		print(Interpol.internal(internalCoords1,internalCoords2,stp,header)[4])
     else
         println("what")
     end
