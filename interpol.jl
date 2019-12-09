@@ -20,9 +20,17 @@ function distance()
     println("execute dii")
 end
 
-function internal()
-    println("execute iii")
-
+function internal(int_arr_1,int_arr_2,steps,header)
+	diffVec = (int_arr_2[:,2]-int_arr_1[:,2])/steps
+	open("temp","w") do io
+	for i in 0:(steps)
+		internals = join(hcat(int_arr_1[:,1],(int_arr_1[:,2]+i*diffVec)))
+		print(internals)
+		# write(io,header)
+		# writedlm(io,internals)
+		# babel_xyz = read(`obabel -igzmat "temp" -oxyz`,String)
+	end
+	end
 end
 
 function writeFile(output_array,atom_names,file)
@@ -51,9 +59,10 @@ function xyz2internal(input_xyz)
     # Imports .xyz file format to zmat, returns internal coord vector
     babel_zmat = read(`obabel -ixyz $(input_xyz) -ogzmat`,String)
     regexmatch = match(r"Variables:",babel_zmat)
-	segment_zmat = babel_zmat[regexmatch.offset:end]
-	internals_array = readdlm(IOBuffer(segment_zmat),skipstart=1)
-    return internals_array
+	coord_segment_zmat = babel_zmat[regexmatch.offset:end]
+	header_segment = babel_zmat[1:regexmatch.offset]
+	internals_array = readdlm(IOBuffer(coord_segment_zmat),skipstart=1)
+    return internals_array, header_segment
 end
 
 end
