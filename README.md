@@ -10,3 +10,5 @@ Flags:
 `--distance`/`-d` LIIC using distance matrix
 
 `--steps`/`-s` Number of steps in LIIC
+
+Internal coordinate scan requires a working installation of OpenBabel
