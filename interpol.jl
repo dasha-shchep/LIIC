@@ -22,21 +22,24 @@ function distance()
 end
 
 function internal(int_arr_1,int_arr_2,steps,header)
-	diffVec = (int_arr_2[:,2]-int_arr_1[:,2])/steps
+	for i in 1:length(int_arr_1)
+		diffVec[i] = (int_arr_2[i,2]-int_arr_1[i,2])/steps
+	end
 	intlArr = Vector(undef,steps)
+	interpollatedArray = Array{Float64,3}(undef,19,3,steps)
+	atom_names = Array{String,1}(undef,19)
 	for j in 1:steps
 		intlArr[j] = header * "Variables:\n" * intlVec(int_arr_1,diffVec,j)
+		open("tmp","w") do io
+			write(io,intlArr[j])
+		end
+		convXyz = read(`obabel -igzmat tmp -oxyz`,String)
+		run(`rm tmp`)
+		just_coords = Array{Float64}(readdlm(IOBuffer(convXyz),skipstart=2)[:,2:4])
+		atom_names = Array{String}(readdlm(IOBuffer(convXyz),skipstart=2)[:,1])
+		interpollatedArray[:,:,j] = just_coords
 	end
-	return intlArr
-	# open("temp","w") do io
-	# for i in 0:steps
-	# 	internals = string(int_arr_1[:,1]," ",(int_arr_1[:,2]+i*diffVec),"\n"))
-	# 	print(internals)
-		# write(io,header)
-		# writedlm(io,internals)
-		# babel_xyz = read(`obabel -igzmat "temp" -oxyz`,String)
-	# end
-	# end
+	return interpollatedArray, atom_names
 end
 
 function intlVec(int_arr_1,diffVec,step)
