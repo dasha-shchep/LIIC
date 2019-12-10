@@ -26,9 +26,9 @@ function internal(int_arr_1,int_arr_2,steps,header)
 	Takes array of Z-matrix internal coordinates and interpolates between them
 	to return an array of xyzs.
 	"""
-	no_internal_crd = size(int_arr_1)[1]
-	diffVec = Vector(undef,no_internal_crd)
-	for i in 1:no_internal_crd
+	numInternalCrd = size(int_arr_1)[1]
+	diffVec = Vector(undef,numInternalCrd)
+	for i in 1:numInternalCrd
 		if ( -180. <= (int_arr_2[i,2]-int_arr_1[i,2]) <= 180. )
 			diffVec[i] = (int_arr_2[i,2]-int_arr_1[i,2])/steps
 		elseif (int_arr_2[i,2] - int_arr_1[i,2]) < -180.
@@ -39,21 +39,21 @@ function internal(int_arr_1,int_arr_2,steps,header)
 			println("Something has gone terribly wrong")
 		end
 	end
-	intlArr = Vector(undef,steps)
-	interpollatedArray = Array{Float32,3}(undef,19,3,steps)
+	zmatArray = Vector(undef,steps)
+	interXYZ = Array{Float32,3}(undef,19,3,steps)
 	atom_names = Array{String,1}(undef,19)
 	for j in 1:steps
-		intlArr[j] = header * "Variables:\n" * intlVec(int_arr_1,diffVec,j)
+		zmatArray[j] = header * "Variables:\n" * intlVec(int_arr_1,diffVec,j)
 		open("tmp","w") do io
-			write(io,intlArr[j])
+			write(io,zmatArray[j])
 		end
 		convXyz = read(`obabel -igzmat tmp -oxyz`,String)
 		run(`rm tmp`)
 		just_coords = Array{Float32}(readdlm(IOBuffer(convXyz),skipstart=2)[:,2:4])
 		atom_names = Array{String}(readdlm(IOBuffer(convXyz),skipstart=2)[:,1])
-		interpollatedArray[:,:,j] = just_coords
+		interXYZ[:,:,j] = just_coords
 	end
-	return interpollatedArray, atom_names
+	return interXYZ, atom_names
 end
 
 function intlVec(int_arr_1,diffVec,step)
