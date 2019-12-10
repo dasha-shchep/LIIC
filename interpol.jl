@@ -22,8 +22,18 @@ function distance()
 end
 
 function internal(int_arr_1,int_arr_2,steps,header)
-	for i in 1:length(int_arr_1)
-		diffVec[i] = (int_arr_2[i,2]-int_arr_1[i,2])/steps
+	"""
+	Takes array of Z-matrix internal coordinates and interpolates between them
+	to return an array of xyzs.
+	"""
+	no_internal_crd = size(int_arr_1)[1]
+	diffVec = Vector(undef,no_internal_crd)
+	for i in 1:no_internal_crd
+		if (int_arr_2[i,2]-int_arr_1[i,2]) <= 180.
+			diffVec[i] = (int_arr_2[i,2]-int_arr_1[i,2])/steps
+		elseif
+			diffVec[i] = 12.
+		end
 	end
 	intlArr = Vector(undef,steps)
 	interpollatedArray = Array{Float64,3}(undef,19,3,steps)
