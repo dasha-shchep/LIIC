@@ -29,14 +29,18 @@ function internal(int_arr_1,int_arr_2,steps,header)
 	no_internal_crd = size(int_arr_1)[1]
 	diffVec = Vector(undef,no_internal_crd)
 	for i in 1:no_internal_crd
-		if (int_arr_2[i,2]-int_arr_1[i,2]) <= 180.
+		if ( -180. <= (int_arr_2[i,2]-int_arr_1[i,2]) <= 180. )
 			diffVec[i] = (int_arr_2[i,2]-int_arr_1[i,2])/steps
-		elseif
-			diffVec[i] = 12.
+		elseif (int_arr_2[i,2] - int_arr_1[i,2]) < -180.
+			diffVec[i] = (int_arr_2[i,2] - int_arr_1[i,2] + 360.)/steps
+		elseif (int_arr_2[i,2]-int_arr_1[i,2]) > 180.
+			diffVec[i] = (int_arr_2[i,2] - int_arr_1[i,2] - 360.)/steps
+		else
+			println("Something has gone terribly wrong")
 		end
 	end
 	intlArr = Vector(undef,steps)
-	interpollatedArray = Array{Float64,3}(undef,19,3,steps)
+	interpollatedArray = Array{Float32,3}(undef,19,3,steps)
 	atom_names = Array{String,1}(undef,19)
 	for j in 1:steps
 		intlArr[j] = header * "Variables:\n" * intlVec(int_arr_1,diffVec,j)
@@ -45,7 +49,7 @@ function internal(int_arr_1,int_arr_2,steps,header)
 		end
 		convXyz = read(`obabel -igzmat tmp -oxyz`,String)
 		run(`rm tmp`)
-		just_coords = Array{Float64}(readdlm(IOBuffer(convXyz),skipstart=2)[:,2:4])
+		just_coords = Array{Float32}(readdlm(IOBuffer(convXyz),skipstart=2)[:,2:4])
 		atom_names = Array{String}(readdlm(IOBuffer(convXyz),skipstart=2)[:,1])
 		interpollatedArray[:,:,j] = just_coords
 	end
