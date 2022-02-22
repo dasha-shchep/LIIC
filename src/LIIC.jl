@@ -9,7 +9,10 @@ using ArgParse
 using DelimitedFiles
 
 include("interpol.jl")
+include("kabsch.jl")
+
 import .Interpol
+import .Kabsch
 
 parse_settings = ArgParseSettings()
 
@@ -40,6 +43,13 @@ function main()
     stp = parsed_args["steps"]
     in_file_1 = parsed_args["geom1"]
     in_file_2 = parsed_args["geom2"]
+# Perform kabsch algorithm on geom2 if kabsch==True
+    if parsed_args["kabsch']
+        println("Running Kabsch algorithm on second geometry prior to LIIC")
+# Add code to run kabsch
+    end
+
+ 
     if parsed_args["cartesian"]
         println("Performing cartesian interpolation...")
         in_mat_1, atomNames1 = Interpol.xyz2matrix(in_file_1)
