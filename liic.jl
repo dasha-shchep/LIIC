@@ -1,5 +1,6 @@
 # Julia LIIC Script
 # Written on 26 November 2019
+# Update on 22 February 2022
 # Execute by running `julia liic.jl --flags path_to_geom1 path_to_geom2`
 
 using LinearAlgebra
