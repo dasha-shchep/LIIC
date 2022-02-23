@@ -28,12 +28,42 @@ function optimal_rotation_matrix(CCmatrix)
     return ORmatrix
 end
 
-function kabsch_rotate()
+function xyz2matrix(input_xyz)
+    # Imports .xyz file format as data frame, and converts it to an N x 3 Matrix
+    raw_xyz=readdlm(input_xyz)
+    natoms=size(raw_xyz)[1]
+    just_coords=Array{Float64}(raw_xyz[2:natoms,2:4])
+    return just_coords
+end
+
+function kabsch_rotate(p_xyz,q_xyz)
     # Returns the two geometries in xyz format, one of which has been translated, the
     # other translated and rotated 
-    test_func()
+    Pgeom = xyz2matrix(p_xyz)
+    Qgeom = xyz2matrix(q_xyz)
+
+    normalisedP = (translate_to_centroid(Pgeom))
+    normalisedQ = (translate_to_centroid(Qgeom))
+    
+    xcov = cross_covariance_matrix(normalisedP,normalisedQ)
+    orot = optimal_rotation_matrix(xcov)
+    
+    num_atoms = size(normalisedP)[1]
+    rotated = zeros(Float64,num_atoms,3)
+    
+    for i=1:num_atoms
+        rotated[i,:] = orot*normalisedP[i,:]
+    end
+
+    display(rotated)
+    RMSD_value = norm(rotated-normalisedQ)
+
+    println("\n The RMSD between these two structures is ",RMSD_value)
+
     println("Kabsch function runs")
 end  
 
 end
+
+
 

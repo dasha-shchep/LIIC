@@ -49,7 +49,7 @@ function main()
 # Perform kabsch algorithm on geom2 if kabsch==True
     if parsed_args["kabsch"]
         println("Running Kabsch algorithm on second geometry prior to LIIC")
-        Kabsch.kabsch_rotate()
+        Kabsch.kabsch_rotate(in_file_1,in_file_2)
 # Add code to run kabsch
     else
         println("not kabsch")
