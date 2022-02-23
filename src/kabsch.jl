@@ -6,7 +6,7 @@ using DelimitedFiles
 using LinearAlgebra
 using Statistics
 
-export run_kabsch
+export kabsch_rotate
 
 function translate_to_centroid(coord_matrix)
     # Normalises the molecular coordinates by centering them.
@@ -28,11 +28,11 @@ function optimal_rotation_matrix(CCmatrix)
     return ORmatrix
 end
 
-function run_kabsch(Pgeom,Qgeom)
+function kabsch_rotate()
     # Returns the two geometries in xyz format, one of which has been translated, the
-    # other translated and rotated
-    
-
+    # other translated and rotated 
+    test_func()
+    println("Kabsch function runs")
 end  
 
 end

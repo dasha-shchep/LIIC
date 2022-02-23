@@ -30,6 +30,9 @@ parse_settings = ArgParseSettings()
         help = "Number of steps between structures in interpolation"
         arg_type = Int
         default = 10
+    "--kabsch", "-k"
+        help = "Whether kabsch should run before interpolation"
+        action = :store_true
     "geom1"
         help = "path to .xyz file containing first geometry"
         required = true
@@ -44,11 +47,13 @@ function main()
     in_file_1 = parsed_args["geom1"]
     in_file_2 = parsed_args["geom2"]
 # Perform kabsch algorithm on geom2 if kabsch==True
-    if parsed_args["kabsch']
+    if parsed_args["kabsch"]
         println("Running Kabsch algorithm on second geometry prior to LIIC")
+        Kabsch.kabsch_rotate()
 # Add code to run kabsch
+    else
+        println("not kabsch")
     end
-
  
     if parsed_args["cartesian"]
         println("Performing cartesian interpolation...")
