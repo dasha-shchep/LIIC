@@ -13,7 +13,7 @@ Flags:
 
 Internal coordinate scan requires a working installation of OpenBabel
 
-Kabsch optimisation can preceed the LIIC and is recommended in the case of cartesian coordinates.
+A Kabsch optimisation routine can preceed the LIIC and is recommended in the case of cartesian coordinates.
 It is invoked by the `--kabsch`/`-k` flag.
 
 
