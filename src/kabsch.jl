@@ -55,12 +55,11 @@ function kabsch_rotate(p_xyz,q_xyz)
         rotated[i,:] = orot*normalisedP[i,:]
     end
 
-    display(rotated)
     RMSD_value = norm(rotated-normalisedQ)
 
-    println("\n The RMSD between these two structures is ",RMSD_value)
+    println("The RMSD between these two structures is ",RMSD_value)
 
-    println("Kabsch function runs")
+    return rotated, normalisedQ
 end  
 
 end

@@ -11,7 +11,7 @@ Flags:
 
 `--steps`/`-s` Number of steps in LIIC
 
-Internal coordinate scan requires a working installation of OpenBabel
+Internal coordinate scan requires a working installation of OpenBabeli, for now.
 
 A Kabsch optimisation routine can preceed the LIIC and is recommended in the case of cartesian coordinates.
 It is invoked by the `--kabsch`/`-k` flag.
