@@ -1,6 +1,6 @@
 # Test module for functions
 module Tst
-    include("interpol.jl")
+    include("../src/interpol.jl")
     import .Interpol
     #using .Interpol
 
