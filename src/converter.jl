@@ -8,11 +8,19 @@ input in the LIIC routines.
 
 export xyz_to_zmat, zmat_to_xyz
 
-struct Molecule{I,F} 
-    Atoms::Vector
-    Coord::Array
+struct Molecule
+    Atoms::Vector{String}
+    Coord::Array{Float64,2}
     Number::Int64
 end
+
+function import_molecule(xyz_file)
+    io = open(xyz_file)
+    string_xyz = read(io,String)
+    # Insert regex to get data
+    close(io)
+    return Molecule(atom_names,coordinates,number)
+end    
 
 function bond(a1,a2)
     return 0
@@ -26,7 +34,7 @@ function dihedral(a1,a2,a3,a4)
     return 0
 end
 
-function xyz_to_zmat(xyz_filename)
+function xyz_to_zmat(molecule)
     zmat_array = []
     return zmat_array
 end
