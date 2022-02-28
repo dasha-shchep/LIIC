@@ -16,10 +16,12 @@ end
 
 function import_molecule(xyz_file)
     io = open(xyz_file)
-    string_xyz = read(io,String)
+    num_atom = parse(Int,readline(io))
+    readline(io)
+    # string_xyz = read(io,String)
     # Insert regex to get data
     close(io)
-    return Molecule(atom_names,coordinates,number)
+    return Molecule(atom_names,coordinates,num_atom)
 end    
 
 function bond(a1,a2)

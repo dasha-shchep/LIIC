@@ -50,9 +50,6 @@ function main()
     if parsed_args["kabsch"]
         println("Running Kabsch algorithm on second geometry prior to LIIC")
         mat1,mat2 = Kabsch.kabsch_rotate(in_file_1,in_file_2)
-# Add code to run kabsch
-    else
-        println("not kabsch")
     end
  
     if parsed_args["cartesian"]
