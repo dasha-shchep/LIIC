@@ -17,12 +17,18 @@ end
 function import_molecule(xyz_file)
     io = open(xyz_file)
     num_atom = parse(Int,readline(io))
-    readline(io)
-    # string_xyz = read(io,String)
-    # Insert regex to get data
+    readline(io);
+    reg=r"([a-zA-Z]+)\s+(-?\d+.?\d*)\s+(-?\d+.?\d*)\s+(-?\d+.?\d*)"
+    atom_names=Vector{String}()
+    atom_coords=Array{Float64,2}(undef,num_atom,3)
+    for num in 1:num_atom
+        m=match(reg,readline(io))
+        push!(atom_names,string(m.captures[1]::SubString))
+        atom_coords[num,:]=[parse(Float64,m.captures[2]),parse(Float64,m.captures[3]),parse(Float64,m.captures[4])]
+    end
     close(io)
-    return Molecule(atom_names,coordinates,num_atom)
-end    
+    return Molecule(atom_names,atom_coords,num_atom)
+end
 
 function bond(a1,a2)
     return 0
