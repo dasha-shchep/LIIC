@@ -18,9 +18,7 @@ end
 
 struct ZMatrix
     Atoms::Vector{String}
-    Bonds::Vector{Float64}
-    Angles::Vector{Float64}
-    Dihedrals::Vector{Float64}
+    IntVars::Vector{Float64}
     VarNames::Vector{String}
     Number::Int64
 end
@@ -66,42 +64,64 @@ end
 function write_zmat(zmat::ZMatrix,withvars::Bool=true)
     if withvars==true
         natoms = length(zmat.Atoms)
-        for atom in 1:(natoms-1)
-            name = zmat.Atoms[atom]
-            printfmt("{:3s} {:>4d}  {:11s} {:>4d}  {:11s} {:>4d}  {:11s}",
-            zmat.Atoms[atom],zmat.Bonds[atom],zmat.Atoms[atom],zmat.Bonds[atom],
-            zmat.Atoms[atom],zmat.Bonds[atom],zmat.Atoms[atom])
+        for atom in 1:natoms
+            if atom < 2
+                printfmtln("{:3s}",zmat.Atoms[atom])
+            elseif atom < 3
+                printfmtln("{:3s} {:>4d}  {:11s}",zmat.Atoms[atom],(atom-1),zmat.VarNames[atom-1])
+            elseif atom < 4
+                printfmtln("{:3s} {:>4d}  {:11s} {:>4d}  {:11s}",zmat.Atoms[atom],(atom-1),
+                zmat.VarNames[atom-1],(atom-2),zmat.VarNames[atom])
+            else
+                printfmtln("{:3s} {:>4d}  {:11s} {:>4d}  {:11s} {:>4d}  {:11s}",zmat.Atoms[atom],
+                (atom-1),zmat.VarNames[3*atom-8],(atom-2),zmat.VarNames[3*atom-7],(atom-3),zmat.VarNames[3*atom-6])
+            end
+        end
+        println("  Variables:")
+        for var in 1:length(zmat.IntVars)
+            printfmtln("{:3s} {:>11.8f}",zmat.VarNames[var],zmat.IntVars[var])
         end
     else
-        println("blah")
+        natoms = length(zmat.Atoms)
+        for atom in 1:natoms
+            if atom < 2
+                printfmtln("{:3s}",zmat.Atoms[atom])
+            elseif atom < 3
+                printfmtln("{:3s} {:>4d}  {:>11.8f}",zmat.Atoms[atom],(atom-1),zmat.IntVars[atom-1])
+            elseif atom < 4
+                printfmtln("{:3s} {:>4d}  {:>11.8f} {:>4d}  {:>11.8f}",zmat.Atoms[atom],(atom-1),
+                zmat.IntVars[atom-1],(atom-2),zmat.IntVars[atom])
+            else
+                printfmtln("{:3s} {:>4d}  {:>11.8f} {:>4d}  {:>11.8f} {:>4d}  {:>11.8f}",zmat.Atoms[atom],
+                (atom-1),zmat.IntVars[3*atom-8],(atom-2),zmat.IntVars[3*atom-7],(atom-3),zmat.IntVars[3*atom-6])
+            end
+        end
     end
 end    
 
 function xyz_to_zmat(molecule)
     natoms     = molecule.Number
     atoms      = molecule.Atoms
-    bonds      = Vector{Float64}()
-    angles     = Vector{Float64}()
-    dihedrals  = Vector{Float64}()
+    intvars      = Vector{Float64}()
     varnames   = Vector{String}()
     for atom in 1:natoms
         if atom > 1
             bl     = bond(molecule.Coord[atom-1,:],molecule.Coord[atom,:])
-            push!(bonds,bl)
+            push!(intvars,bl)
             push!(varnames,"R$atom")
         end
         if atom > 2
             agl  = angle(molecule.Coord[atom-2,:],molecule.Coord[atom-1,:],molecule.Coord[atom,:])
-            push!(angles,agl)
+            push!(intvars,agl)
             push!(varnames,"A$atom")
         end
         if atom > 3
             dhl  = dihedral(molecule.Coord[atom-3,:],molecule.Coord[atom-2,:],molecule.Coord[atom-1,:],molecule.Coord[atom,:])
-            push!(dihedrals,dhl)
+            push!(intvars,dhl)
             push!(varnames,"D$atom")
         end
     end
-    zmatrix    = ZMatrix(atoms,bonds,angles,dihedrals,varnames,natoms)
+    zmatrix    = ZMatrix(atoms,intvars,varnames,natoms)
     return zmatrix
 end
 
