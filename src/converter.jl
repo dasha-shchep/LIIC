@@ -126,7 +126,11 @@ function xyz_to_zmat(molecule)
 end
 
 function zmat_to_xyz(zmat::ZMatrix)
-    xyz=Array{Float64,2}
+    natoms=zmat.Number
+    atom_coords = Array{Float64,2}(undef,natoms,3)
+    if natoms > 0
+        atom_coords[1,:]=[0.0,0.0,0.0]
+    mol=Molecule(zmat.Atoms,atom_coords,natoms)
     return mol::Molecule
 end
 
