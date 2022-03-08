@@ -130,6 +130,19 @@ function zmat_to_xyz(zmat::ZMatrix)
     atom_coords = Array{Float64,2}(undef,natoms,3)
     if natoms > 0
         atom_coords[1,:]=[0.0,0.0,0.0]
+        if natoms > 1
+            r2 = zmat.IntVars[1]
+            atom_coords[2,:]=[r2,0.0,0.0]
+            if natoms > 2
+                r3 = zmat.IntVars[2]
+                a3 = zmat.IntVars[3]
+                atom_coords[3,:] = [r3*cosd(a3),r3*sind(a3),0.0]
+                if natoms > 3
+                    #  ugh dihedrals
+                end 
+            end
+        end
+    end
     mol=Molecule(zmat.Atoms,atom_coords,natoms)
     return mol::Molecule
 end
