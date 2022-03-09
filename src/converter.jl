@@ -136,9 +136,23 @@ function zmat_to_xyz(zmat::ZMatrix)
             if natoms > 2
                 r3 = zmat.IntVars[2]
                 a3 = zmat.IntVars[3]
-                atom_coords[3,:] = [r3*cosd(a3),r3*sind(a3),0.0]
+                atom_coords[3,:] = [r2+r3*cosd(a3),r3*sind(a3),0.0]
                 if natoms > 3
-                    #  ugh dihedrals
+                    for atom in 4:natoms
+                        rn = zmat.IntVars[3*atom-8]
+                        an = zmat.IntVars[3*atom-7]
+                        dn = zmat.IntVars[3*atom-6]
+                        M = [-cosd(an) -sind(an) 0. -rn*cosd(dn);
+                        sind(an)*cosd(dn) -cosd(an)*cosd(dn) -sind(dn) rn*sind(an)*cosd(dn);
+                        sind(an)*cosd(dn) -cosd(an)*sind(dn) cosd(dn) rn*sind(an)*sind(dn);0. 0. 0. 1.]
+                        InvM = inv(M)
+                        vec=push!(atom_coords[atom-1,:],1.0)
+                        newvec = InvM*vec
+                        atom_coords[atom,:] = deleteat!(newvec,4)
+                        # ox = rn * cosd(an)
+                        # oy = rn * cosd(dn) * sind(an)
+                        # oz = rn * sind(an) * sind(dn)
+                    end
                 end 
             end
         end
