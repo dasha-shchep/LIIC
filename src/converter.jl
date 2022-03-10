@@ -44,20 +44,22 @@ function bond(a1::Vector{Float64},a2::Vector{Float64})
 end
 
 function angle(a1::Vector{Float64},a2::Vector{Float64},a3::Vector{Float64})
-    bond1 = a1-a2
-    bond2 = a3-a2
-    angle = acosd(dot(bond1,bond2)/(norm(bond1)*norm(bond2)))
+    bond1 = a3-a2
+    bond2 = a2-a1
+    angle = acosd(dot(-bond1,bond2)/(norm(bond1)*norm(bond2)))
     return angle::Float64
 end
 
 function dihedral(a1::Vector{Float64},a2::Vector{Float64},a3::Vector{Float64},a4::Vector{Float64})
-    bond1 = a2-a1
-    bond2 = a3-a2
-    bond3 = a4-a3
+    bond1 = a1-a4
+    bond2 = a2-a1
+    bond3 = a3-a2
     plane1 = cross(bond1,bond2)
-    plane2 = cross(bond2,bond3)
-    normalize = norm(plane1)*norm(plane2)
-    dihedral = acosd(dot(plane1,plane2)/normalize)
+    plane2 = cross(bond2,bond3) 
+    dihedral = acosd(dot(plane1,plane2)/(norm(plane1)*norm(plane2)))
+    if dot(cross(plane1,plane2),bond2) < 0
+        dihedral = -dihedral
+    end
     return dihedral::Float64
 end
 
@@ -148,9 +150,15 @@ function zmat_to_xyz(zmat::ZMatrix)
             atom_coords[2,:]=[r2,0.0,0.0]
 
             if natoms > 2
+                vec = atom_coords[2,:] - atom_coords[1,:]
                 r3 = zmat.IntVars[2]
                 a3 = zmat.IntVars[3]
-                atom_coords[3,:] = [r2+r3*cosd(a3),r3*sind(a3),0.0]
+                vec = r3 * vec / norm(vec)
+                vec = rotation_matrix([0, 0, 1], a3) * vec
+                atom_coords[3,:] = atom_coords[2,:] + vec
+                # r3 = zmat.IntVars[2]
+                # a3 = zmat.IntVars[3]
+                # atom_coords[3,:] = [r3*cosd(a3),r3*sind(a3),0.0]
 
                 if natoms > 3
                     for atom in 4:natoms
