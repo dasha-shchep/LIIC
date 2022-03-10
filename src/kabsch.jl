@@ -24,7 +24,18 @@ end
 
 function optimal_rotation_matrix(CCmatrix)
     # Returns 3x3 matrix that can be applied to P to get Q
-    ORmatrix = sqrt(transpose(CCmatrix)*CCmatrix)*inv(CCmatrix)
+    # Previous implementation, not general (for cases of non-invertible matrices)
+    # ORmatrix = sqrt(transpose(CCmatrix)*CCmatrix)*inv(CCmatrix)
+    # Using SVD instead
+    u,sing,vt = svd(CCmatrix)
+    if sign(det(transpose(vt)*transpose(u))) == 1.0
+        ORmatrix = transpose(vt)*transpose(u)
+    elseif sign(det(transpose(vt)*transpose(u))) == -1.0
+        mat = [1. 0. 0.;0. 1. 0.; 0. 0. -1.]
+        ORmatrix = transpose(vt)*mat*transpose(u)
+    else
+        println("Error: Issue with SVD routine in finding optimal rotation matrix")
+    end
     return ORmatrix
 end
 
@@ -36,11 +47,11 @@ function xyz2matrix(input_xyz)
     return just_coords
 end
 
-function kabsch_rotate(p_xyz,q_xyz)
+function kabsch_rotate(Pgeom,Qgeom)
     # Returns the two geometries in xyz format, one of which has been translated, the
     # other translated and rotated 
-    Pgeom = xyz2matrix(p_xyz)
-    Qgeom = xyz2matrix(q_xyz)
+    # Pgeom = xyz2matrix(p_xyz)
+    # Qgeom = xyz2matrix(q_xyz)
 
     normalisedP = (translate_to_centroid(Pgeom))
     normalisedQ = (translate_to_centroid(Qgeom))
