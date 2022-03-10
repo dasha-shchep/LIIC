@@ -125,39 +125,73 @@ function xyz_to_zmat(molecule)
     return zmatrix
 end
 
+function rotation_matrix(axis,angle)
+    # Rotation about the origin in 3 dimensions using the Euler-Rodrigues formula
+    axis = axis / norm(axis)
+    a = cosd(angle*0.5)
+    (b,c,d) = -axis * sind(angle*0.5)
+    rotM = [a*a+b*b-c*c-d*d 2*(b*c-a*d) 2*(b*d+a*c);
+    2*(b*c+a*d) a*a+c*c-b*b-d*d 2*(c*d-a*b); 
+    2*(b*d-a*c) 2*(c*d+a*b) a*a+d*d-b*b-c*c]
+    return rotM::Matrix{Float64}
+end
+
 function zmat_to_xyz(zmat::ZMatrix)
     natoms=zmat.Number
     atom_coords = Array{Float64,2}(undef,natoms,3)
+
     if natoms > 0
         atom_coords[1,:]=[0.0,0.0,0.0]
+
         if natoms > 1
             r2 = zmat.IntVars[1]
             atom_coords[2,:]=[r2,0.0,0.0]
+
             if natoms > 2
                 r3 = zmat.IntVars[2]
                 a3 = zmat.IntVars[3]
                 atom_coords[3,:] = [r2+r3*cosd(a3),r3*sind(a3),0.0]
+
                 if natoms > 3
                     for atom in 4:natoms
                         rn = zmat.IntVars[3*atom-8]
                         an = zmat.IntVars[3*atom-7]
                         dn = zmat.IntVars[3*atom-6]
-                        M = [-cosd(an) -sind(an) 0. -rn*cosd(dn);
-                        sind(an)*cosd(dn) -cosd(an)*cosd(dn) -sind(dn) rn*sind(an)*cosd(dn);
-                        sind(an)*cosd(dn) -cosd(an)*sind(dn) cosd(dn) rn*sind(an)*sind(dn);0. 0. 0. 1.]
-                        InvM = inv(M)
-                        vec=push!(atom_coords[atom-1,:],1.0)
-                        newvec = InvM*vec
-                        atom_coords[atom,:] = deleteat!(newvec,4)
+
                         # ox = rn * cosd(an)
                         # oy = rn * cosd(dn) * sind(an)
                         # oz = rn * sind(an) * sind(dn)
+
+                        # Coordinates of the last three atoms
+                        am1 = atom_coords[atom-1,:]
+                        am2 = atom_coords[atom-2,:]
+                        am3 = atom_coords[atom-3,:]
+
+                        # Vectors between them
+                        vec1 = am1 - am2
+                        vec2 = am3 - am2
+                        # Plane normal defined by these vectors
+                        nm = cross(vec1,vec2)
+                        
+                        # Vector of length rn pointing along vec1
+                        vecrn = rn * vec1 / norm(vec1)
+
+                        # Rotate vecrn by angle an around the normal
+                        vecan = rotation_matrix(nm,an)*vecrn
+                        
+                        # Rotate vecan around dihedral angle
+                        vecdn = rotation_matrix(vec1,dn)*vecan
+                        
+                        # Add this vector to previous coordinate
+                        atom_coords[atom,:] = am1 + vecdn
                     end
                 end 
             end
         end
     end
+
     mol=Molecule(zmat.Atoms,atom_coords,natoms)
+
     return mol::Molecule
 end
 
