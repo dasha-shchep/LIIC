@@ -44,16 +44,20 @@ function bond(a1::Vector{Float64},a2::Vector{Float64})
 end
 
 function angle(a1::Vector{Float64},a2::Vector{Float64},a3::Vector{Float64})
-    bond1 = a3-a2
-    bond2 = a2-a1
-    angle = acosd(dot(-bond1,bond2)/(norm(bond1)*norm(bond2)))
+    bond1 = a3 - a2
+    bond2 = a1 - a2
+    sintheta = norm(cross(bond1, bond2))
+    costheta = dot(bond1,bond2)
+    theta = atan(sintheta,costheta)
+    angle = 180.0 * theta/pi
+    # angle = acosd(dot(bond1,bond2)/(norm(bond1)*norm(bond2)))
     return angle::Float64
 end
 
 function dihedral(a1::Vector{Float64},a2::Vector{Float64},a3::Vector{Float64},a4::Vector{Float64})
-    bond1 = a1-a4
-    bond2 = a2-a1
-    bond3 = a3-a2
+    bond1 = a4-a3
+    bond2 = a3-a2
+    bond3 = a2-a1
     plane1 = cross(bond1,bond2)
     plane2 = cross(bond2,bond3) 
     dihedral = acosd(dot(plane1,plane2)/(norm(plane1)*norm(plane2)))
