@@ -46,7 +46,7 @@ end
 function angle(a1::Vector{Float64},a2::Vector{Float64},a3::Vector{Float64})
     bond1 = a3 - a2
     bond2 = a1 - a2
-    sintheta = norm(cross(bond1, bond2))
+    sintheta = norm(cross(bond1,coordsbond2))
     costheta = dot(bond1,bond2)
     theta = atan(sintheta,costheta)
     angle = 180.0 * theta/pi
@@ -133,9 +133,9 @@ end
 
 function rotation_matrix(axis,angle)
     # Rotation about the origin in 3 dimensions using the Euler-Rodrigues formula
-    axis = axis / norm(axis)
+    axis = -axis / norm(axis)
     a = cosd(angle*0.5)
-    (b,c,d) = -axis * sind(angle*0.5)
+    (b,c,d) = axis * sind(angle*0.5)
     rotM = [a*a+b*b-c*c-d*d 2*(b*c-a*d) 2*(b*d+a*c);
     2*(b*c+a*d) a*a+c*c-b*b-d*d 2*(c*d-a*b); 
     2*(b*d-a*c) 2*(c*d+a*b) a*a+d*d-b*b-c*c]
@@ -158,8 +158,7 @@ function zmat_to_xyz(zmat::ZMatrix)
                 r3 = zmat.IntVars[2]
                 a3 = zmat.IntVars[3]
                 vec = r3 * vec / norm(vec)
-                vec = rotation_matrix([0, 0, 1], a3) * vec
-                atom_coords[3,:] = atom_coords[2,:] + vec
+                atom_coords[3,:] = rotation_matrix([0, 0, 1], a3) * vec
                 # r3 = zmat.IntVars[2]
                 # a3 = zmat.IntVars[3]
                 # atom_coords[3,:] = [r3*cosd(a3),r3*sind(a3),0.0]
@@ -195,7 +194,7 @@ function zmat_to_xyz(zmat::ZMatrix)
                         vecdn = rotation_matrix(vec1,dn)*vecan
                         
                         # Add this vector to previous coordinate
-                        atom_coords[atom,:] = am1 + vecdn
+                        atom_coords[atom,:] = am2 + vecdn
                     end
                 end 
             end
