@@ -45,8 +45,8 @@ end
 
 function angle(a1::Vector{Float64},a2::Vector{Float64},a3::Vector{Float64})
     bond1 = a3 - a2
-    bond2 = a1 - a2
-    sintheta = norm(cross(bond1,coordsbond2))
+    bond2 = a2 - a1
+    sintheta = norm(cross(bond1,bond2))
     costheta = dot(bond1,bond2)
     theta = atan(sintheta,costheta)
     angle = 180.0 * theta/pi
@@ -103,7 +103,7 @@ function write_zmat(zmat::ZMatrix,withvars::Bool=true)
             end
         end
     end
-end    
+end
 
 function xyz_to_zmat(molecule)
     natoms     = molecule.Number
@@ -158,10 +158,7 @@ function zmat_to_xyz(zmat::ZMatrix)
                 r3 = zmat.IntVars[2]
                 a3 = zmat.IntVars[3]
                 vec = r3 * vec / norm(vec)
-                atom_coords[3,:] = rotation_matrix([0, 0, 1], a3) * vec
-                # r3 = zmat.IntVars[2]
-                # a3 = zmat.IntVars[3]
-                # atom_coords[3,:] = [r3*cosd(a3),r3*sind(a3),0.0]
+                atom_coords[3,:] = atom_coords[2,:] + (rotation_matrix([0, 0, 1], a3) * vec)
 
                 if natoms > 3
                     for atom in 4:natoms
@@ -180,7 +177,7 @@ function zmat_to_xyz(zmat::ZMatrix)
 
                         # Vectors between them
                         vec1 = am1 - am2
-                        vec2 = am3 - am2
+                        vec2 = am2 - am3
                         # Plane normal defined by these vectors
                         nm = cross(vec1,vec2)
                         
@@ -194,7 +191,7 @@ function zmat_to_xyz(zmat::ZMatrix)
                         vecdn = rotation_matrix(vec1,dn)*vecan
                         
                         # Add this vector to previous coordinate
-                        atom_coords[atom,:] = am2 + vecdn
+                        atom_coords[atom,:] = am1 + vecdn
                     end
                 end 
             end
