@@ -69,7 +69,7 @@ end
 
 function write_zmat(zmat::ZMatrix,withvars::Bool=true)
     if withvars==true
-        natoms = length(zmat.Atoms)
+        natoms = zmat.Number
         for atom in 1:natoms
             if atom < 2
                 printfmtln("{:3s}",zmat.Atoms[atom])
@@ -102,6 +102,15 @@ function write_zmat(zmat::ZMatrix,withvars::Bool=true)
                 (atom-1),zmat.IntVars[3*atom-8],(atom-2),zmat.IntVars[3*atom-7],(atom-3),zmat.IntVars[3*atom-6])
             end
         end
+    end
+end
+
+function write_xyz(mol::Molecule)
+    natoms = mol.Number
+    printfmtln("{:>4d}",natoms)
+    println()
+    for atom in 1:natoms
+        printfmtln("{:3s}   {:>11.8f}   {:>11.8f}    {:>11.8f}",mol.Atoms[atom],mol.Coord[atom,1],mol.Coord[atom,2],mol.Coord[atom,3])
     end
 end
 
