@@ -105,12 +105,22 @@ function write_zmat(zmat::ZMatrix,withvars::Bool=true)
     end
 end
 
-function write_xyz(mol::Molecule)
+function write_xyz(mol::Molecule,io=nothing)
     natoms = mol.Number
-    printfmtln("{:>4d}",natoms)
-    println()
-    for atom in 1:natoms
-        printfmtln("{:3s}   {:>11.8f}   {:>11.8f}    {:>11.8f}",mol.Atoms[atom],mol.Coord[atom,1],mol.Coord[atom,2],mol.Coord[atom,3])
+    if io != nothing
+        printfmtln(io,"{:>4d}",natoms)
+        println(io)
+        for atom in 1:natoms
+            printfmtln(io,"{:3s}   {:>11.8f}   {:>11.8f}    {:>11.8f}",mol.Atoms[atom],mol.Coord[atom,1],mol.Coord[atom,2],mol.Coord[atom,3])
+        end
+    elseif io == nothing
+        printfmtln("{:>4d}",natoms)
+        println()
+        for atom in 1:natoms
+            printfmtln("{:3s}   {:>11.8f}   {:>11.8f}    {:>11.8f}",mol.Atoms[atom],mol.Coord[atom,1],mol.Coord[atom,2],mol.Coord[atom,3])
+        end
+    else
+        println("Error in write_xyz")
     end
 end
 
