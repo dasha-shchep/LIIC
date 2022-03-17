@@ -30,6 +30,7 @@ function internal(zmat_start,zmat_end,steps)
 	for step in 1:steps
 		liic_points[:,:,step] = int_start + step*difference
 	end
+	return liic_points
 end
 
 # OLD IMPLEMENTATION THAT USED OPEN BABEL
