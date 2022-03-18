@@ -26,10 +26,11 @@ function internal(zmat_start,zmat_end,steps)
 	int_end = zmat_end.IntVars
 	natoms = zmat_end.Number
 	difference = (int_end - int_start)/(steps-1)
-	liic_points = Array{Float64,3}(undef,natoms,3,steps)
+	liic_points = Array{Float64,2}(undef,length(difference),steps)
 	for step in 1:steps
-		liic_points[:,:,step] = int_start + step*difference
+		liic_points[:,step] = int_start + (step-1)*difference
 	end
+	@assert isapprox(int_end,liic_points[:,10],atol=1e-5)
 	return liic_points
 end
 
