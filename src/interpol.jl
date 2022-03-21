@@ -21,17 +21,33 @@ function distance()
     println("execute dii")
 end
 
-function internal(zmat_start,zmat_end,steps)
-	int_start = zmat_start.IntVars
-	int_end = zmat_end.IntVars
-	natoms = zmat_end.Number
-	difference = (int_end - int_start)/(steps-1)
-	liic_points = Array{Float64,2}(undef,length(difference),steps)
-	for step in 1:steps
-		liic_points[:,step] = int_start + (step-1)*difference
+function internal(zmat_f,zmat_l,steps)
+	int_f = zmat_f.IntVars
+	int_l = zmat_l.IntVars
+	natoms = zmat_l.Number
+	nvars = length(zmat_l.IntVars)
+	difference = Vector(undef,nvars)
+	for i in 1:nvars
+		diff = zmat_l.IntVars[i]-zmat_f.IntVars[i]
+		if -180. <= diff <= 180.
+			difference[i] = diff
+		elseif diff < 180.
+			difference[i] = diff + 360.
+		elseif diff > 180.
+			difference[i] = diff - 360.
+		else
+			println("ERROR")
+		end
 	end
-	@assert isapprox(int_end,liic_points[:,10],atol=1e-5)
-	return liic_points
+	difference = difference / (steps-1)
+	liic = Array{Float64,2}(undef,nvars,steps)
+	arrayOfZMats = Array{ZMatrix, 1}(undef, steps)
+	for step in 1:steps
+		liic[:,step] = int_f + (step-1)*difference
+		arrayOfZMats[step] = ZMatrix(zmat_f.Atoms,liic[:,step],zmat_f.VarNames,natoms)
+	end
+	@assert isapprox(int_l,liic[:,steps],atol=1e-5)
+	return arrayOfZMats
 end
 
 # OLD IMPLEMENTATION THAT USED OPEN BABEL
