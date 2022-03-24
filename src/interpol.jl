@@ -42,16 +42,6 @@ function internal(zmat_f,zmat_l,steps)
 				difference[i] = toAngle - fromAngle
 			end
 		end
-		# diff = zmat_l.IntVars[i]-zmat_f.IntVars[i]
-		# if -180. < diff < 180.
-		# 	difference[i] = diff
-		# elseif diff < 180.
-		# 	difference[i] = diff + 360.
-		# elseif diff > 180.
-		# 	difference[i] = diff - 360.
-		# else
-		# 	println("ERROR")
-		# end
 	end
 	difference = difference / (steps-1)
 	liic = Array{Float64,2}(undef,nvars,steps)
