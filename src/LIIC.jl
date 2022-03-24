@@ -65,9 +65,9 @@ function main()
 		internalCoords1,header = Interpol.xyz2internal(in_file_1)
 		internalCoords2,header = Interpol.xyz2internal(in_file_2)
 		@assert internalCoords1[:,1] == internalCoords2[:,1]
-		outputArray, atomNames1 = Interpol.internal(internalCoords1,internalCoords2,stp,header)
+		outputArray, atomNames1 = Interpol.internal_babel(internalCoords1,internalCoords2,stp,header)
     else
-        println("what")
+        println("ERROR")
     end
 
     f = "liic_output.xyz"

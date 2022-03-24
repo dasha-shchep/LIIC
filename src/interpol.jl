@@ -28,16 +28,30 @@ function internal(zmat_f,zmat_l,steps)
 	nvars = length(zmat_l.IntVars)
 	difference = Vector(undef,nvars)
 	for i in 1:nvars
-		diff = zmat_l.IntVars[i]-zmat_f.IntVars[i]
-		if -180. <= diff <= 180.
-			difference[i] = diff
-		elseif diff < 180.
-			difference[i] = diff + 360.
-		elseif diff > 180.
-			difference[i] = diff - 360.
+		toAngle = (zmat_l.IntVars[i]+180.)
+		fromAngle = (zmat_f.IntVars[i]+180.)
+		diff = abs(toAngle - fromAngle)
+		if diff < 180.
+			difference[i] = toAngle - fromAngle
 		else
-			println("ERROR")
+			if fromAngle > toAngle
+				fromAngle = fromAngle - 360.
+				difference[i] = toAngle - fromAngle
+			elseif toAngle > fromAngle
+				toAngle = toAngle - 360.
+				difference[i] = toAngle - fromAngle
+			end
 		end
+		# diff = zmat_l.IntVars[i]-zmat_f.IntVars[i]
+		# if -180. < diff < 180.
+		# 	difference[i] = diff
+		# elseif diff < 180.
+		# 	difference[i] = diff + 360.
+		# elseif diff > 180.
+		# 	difference[i] = diff - 360.
+		# else
+		# 	println("ERROR")
+		# end
 	end
 	difference = difference / (steps-1)
 	liic = Array{Float64,2}(undef,nvars,steps)
@@ -51,41 +65,42 @@ function internal(zmat_f,zmat_l,steps)
 end
 
 # OLD IMPLEMENTATION THAT USED OPEN BABEL
-# function internal(int_arr_1,int_arr_2,steps,header)
-# 	"""
-# 	Takes array of Z-matrix internal coordinates and interpolates between them
-# 	to return an array of xyzs.
-# 	"""
-	# numInternalCrd = size(int_arr_1)[1]
-	# diffVec = Vector(undef,numInternalCrd)
-	# for i in 1:numInternalCrd
-	# 	if ( -180. <= (int_arr_2[i,2]-int_arr_1[i,2]) <= 180. )
-	# 		diffVec[i] = (int_arr_2[i,2]-int_arr_1[i,2])/steps
-	# 	elseif (int_arr_2[i,2] - int_arr_1[i,2]) < -180.
-	# 		diffVec[i] = (int_arr_2[i,2] - int_arr_1[i,2] + 360.)/steps
-	# 	elseif (int_arr_2[i,2]-int_arr_1[i,2]) > 180.
-	# 		diffVec[i] = (int_arr_2[i,2] - int_arr_1[i,2] - 360.)/steps
-	# 	else
-	# 		println("Something has gone terribly wrong")
-	# 	end
-	# end
-	# zmatArray = Vector(undef,steps)
-	# interXYZ = Array{Float32,3}(undef,19,3,steps)
-	# atom_names = Array{String,1}(undef,19)
-	# for j in 1:steps
-	# 	zmatArray[j] = header * "Variables:\n" * intlVec(int_arr_1,diffVec,j)
-	# 	open("tmp","w") do io
-	# 		write(io,zmatArray[j])
-	# 	end
-	# 	convXyz = read(`obabel -igzmat tmp -oxyz`,String)
-	# 	run(`rm tmp`)
-	# 	just_coords = Array{Float32}(readdlm(IOBuffer(convXyz),skipstart=2)[:,2:4])
-	# 	atom_names = Array{String}(readdlm(IOBuffer(convXyz),skipstart=2)[:,1])
-	# 	interXYZ[:,:,j] = just_coords
-	# end
-	# return interXYZ, atom_names
-# end
-	# END OF OLD IMPLEMENTATION
+function internal_babel(int_arr_1,int_arr_2,steps,header)
+	"""
+	Takes array of Z-matrix internal coordinates and interpolates between them
+	to return an array of xyzs.
+	"""
+	numInternalCrd = size(int_arr_1)[1]
+	natoms = Int((numInternalCrd + 6)/3)
+	diffVec = Vector(undef,numInternalCrd)
+	for i in 1:numInternalCrd
+		if ( -180. <= (int_arr_2[i,2]-int_arr_1[i,2]) <= 180. )
+			diffVec[i] = (int_arr_2[i,2]-int_arr_1[i,2])/steps
+		elseif (int_arr_2[i,2] - int_arr_1[i,2]) < -180.
+			diffVec[i] = (int_arr_2[i,2] - int_arr_1[i,2] + 360.)/steps
+		elseif (int_arr_2[i,2]-int_arr_1[i,2]) > 180.
+			diffVec[i] = (int_arr_2[i,2] - int_arr_1[i,2] - 360.)/steps
+		else
+			println("Something has gone terribly wrong")
+		end
+	end
+	zmatArray = Vector(undef,steps)
+	interXYZ = Array{Float32,3}(undef,natoms,3,steps)
+	atom_names = Array{String,1}(undef,natoms)
+	for j in 1:steps
+		zmatArray[j] = header * "Variables:\n" * intlVec(int_arr_1,diffVec,j)
+		open("tmp","w") do io
+			write(io,zmatArray[j])
+		end
+		convXyz = read(`obabel -igzmat tmp -oxyz`,String)
+		run(`rm tmp`)
+		just_coords = Array{Float32}(readdlm(IOBuffer(convXyz),skipstart=2)[:,2:4])
+		atom_names = Array{String}(readdlm(IOBuffer(convXyz),skipstart=2)[:,1])
+		interXYZ[:,:,j] = just_coords
+	end
+	return interXYZ, atom_names
+end
+# END OF OLD IMPLEMENTATION
 
 function intlVec(int_arr_1,diffVec,step)
 	"""

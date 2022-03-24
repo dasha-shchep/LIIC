@@ -11,7 +11,7 @@ Flags:
 
 `--steps`/`-s` Number of steps in LIIC
 
-Internal coordinate scan requires a working installation of OpenBabel, for now.
+Internal coordinate scan requires a working installation of OpenBabel, for Z-Matrix conversions, for now.
 
 A Kabsch optimisation routine can preceed the LIIC and is recommended in the case of cartesian coordinates, and also gives the RMSD between the two structures.
 It is invoked by the `--kabsch`/`-k` flag.
