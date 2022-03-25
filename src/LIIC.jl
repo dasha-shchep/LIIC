@@ -10,9 +10,11 @@ using DelimitedFiles
 
 include("interpol.jl")
 include("kabsch.jl")
+include("converter.jl")
 
 import .Interpol
 import .Kabsch
+using .Converter
 
 parse_settings = ArgParseSettings()
 
@@ -54,10 +56,12 @@ function main()
  
     if parsed_args["cartesian"]
         println("Performing cartesian interpolation...")
-        in_mat_1, atomNames1 = Interpol.xyz2matrix(in_file_1)
-        in_mat_2, atomNames2 = Interpol.xyz2matrix(in_file_2)
-		@assert atomNames1 == atomNames2
-        outputArray = Interpol.cartesian(in_mat_1,in_mat_2,stp)
+        # in_mat_1, atomNames1 = Interpol.xyz2matrix(in_file_1)
+        # in_mat_2, atomNames2 = Interpol.xyz2matrix(in_file_2)
+        MoleculeA = Converter.import_molecule(in_file_1)
+        MoleculeB = Converter.import_molecule(in_file_2)
+		@assert MoleculeA.Atoms == MoleculeB.Atoms
+        outputArray = Interpol.cartesian(MoleculeA,MoleculeB,stp)
     elseif parsed_args["distance"]
         println("Performing interpolation in internal distance matrix...")
     elseif parsed_args["internal"]

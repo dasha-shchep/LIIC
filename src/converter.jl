@@ -9,6 +9,7 @@ using LinearAlgebra
 using Formatting
 
 export xyz_to_zmat, zmat_to_xyz
+export Molecule, ZMatrix
 
 struct Molecule
     Atoms::Vector{String}
