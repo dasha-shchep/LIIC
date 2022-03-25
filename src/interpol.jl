@@ -4,17 +4,21 @@ module Interpol
 using DelimitedFiles
 export cartesian, distance, internal, xyz2matrix, writeFile
 
-function cartesian(inMat1,inMat2,steps)
+function cartesian(mol1::Molecule,mol2::Molecule,steps)
 	"""
-    For an N atom system, this function returns a 3D, N x 3 x nsteps, array
+    This function returns an "steps" length array of Molecule objects
 	"""
-    diffMat = (inMat2 - inMat1) / (steps - 1)
-    natoms = size(diffMat)[1]
-    interpollatedArray = Array{Float32,3}(undef,natoms,3,steps)
-    for i in 0:(steps - 1)
-        interpollatedArray[:,:,i+1] = inMat1 + i * diffMat
+    # difference = (mol2.Coord - mol1.Coord) / (steps - 1)
+    natoms = mol1.Number
+	liic = Array{Float64,3}(undef,natoms,3,steps)
+    arrayOfMolecules = Array{Molecule, 1}(undef, steps)
+    for step in 1:steps
+		fracA = (steps-step)/(steps-1)
+		fracB = (step-1)/(steps-1)
+		liic[:,:,step] = mol1.Coord*fracA + mol2.Coord*fracB
+        arrayOfMolecules[step] = Molecule(mol1.Atoms,liic[:,:,step],natoms) 
     end
-    return interpollatedArray
+    return arrayOfMolecules
 end
 
 function distance()
