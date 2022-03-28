@@ -8,13 +8,17 @@ using ArgParse
 
 using DelimitedFiles
 
-include("interpol.jl")
-include("kabsch.jl")
-include("converter.jl")
+include("utils.jl")
+import .Utils
+# import .Utils.Conversion
+# import .Utils.Interpollation
+# import .Utils.Kabsc
 
-import .Interpol
-import .Kabsch
-using .Converter
+# include("interpol.jl")
+# include("kabsch.jl")
+# include("converter.jl")
+
+# using .Interpol, .Kabsch, .Converter
 
 parse_settings = ArgParseSettings()
 
@@ -58,16 +62,16 @@ function main()
         println("Performing cartesian interpolation...")
         # in_mat_1, atomNames1 = Interpol.xyz2matrix(in_file_1)
         # in_mat_2, atomNames2 = Interpol.xyz2matrix(in_file_2)
-        MoleculeA = Converter.import_molecule(in_file_1)
-        MoleculeB = Converter.import_molecule(in_file_2)
+        MoleculeA = Utils.import_molecule(in_file_1)
+        MoleculeB = Utils.import_molecule(in_file_2)
 		@assert MoleculeA.Atoms == MoleculeB.Atoms
-        outputArray = Interpol.cartesian(MoleculeA,MoleculeB,stp)
+        outputArray = Utils.cartesian(MoleculeA,MoleculeB,stp)
     elseif parsed_args["distance"]
         println("Performing interpolation in internal distance matrix...")
     elseif parsed_args["internal"]
         println("Performing interpolation in internal coordinates...")
-		internalCoords1,header = Interpol.xyz2internal(in_file_1)
-		internalCoords2,header = Interpol.xyz2internal(in_file_2)
+		internalCoords1,header = Utils.xyz2internal(in_file_1)
+		internalCoords2,header = Utils.xyz2internal(in_file_2)
 		@assert internalCoords1[:,1] == internalCoords2[:,1]
 		outputArray, atomNames1 = Interpol.internal_babel(internalCoords1,internalCoords2,stp,header)
     else
@@ -76,7 +80,7 @@ function main()
 
     f = "liic_output.xyz"
 
-    Interpol.writeFile(outputArray,atomNames1,f)
+    Utils.write_liic(outputArray,f)
 
 end
 
