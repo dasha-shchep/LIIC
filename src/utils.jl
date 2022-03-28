@@ -44,14 +44,14 @@ function optimal_rotation_matrix(CCmatrix)
     return ORmatrix
 end
 
-function kabsch_rotate(Pgeom,Qgeom)
+function kabsch_rotate(Pxyz,Qxyz)
     # Returns the two geometries in xyz format, one of which has been translated, the
     # other translated and rotated 
-    # Pgeom = xyz2matrix(p_xyz)
-    # Qgeom = xyz2matrix(q_xyz)
+    Pgeom = import_molecule(Pxyz)
+    Qgeom = import_molecule(Qxyz)
 
-    normalisedP = (translate_to_centroid(Pgeom))
-    normalisedQ = (translate_to_centroid(Qgeom))
+    normalisedP = (translate_to_centroid(Pgeom.Coord))
+    normalisedQ = (translate_to_centroid(Qgeom.Coord))
     
     # Calculate cross covariance matrix
     xcov = transpose(normalisedP)*normalisedQ

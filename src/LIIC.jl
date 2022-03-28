@@ -53,7 +53,7 @@ function main()
 # Perform kabsch algorithm on geom2 if kabsch==True
     if parsed_args["kabsch"]
         println("Running Kabsch algorithm on second geometry prior to LIIC")
-        mat1,mat2 = Kabsch.kabsch_rotate(in_file_1,in_file_2)
+        mat1,mat2 = Utils.kabsch_rotate(in_file_1,in_file_2)
     end
  
     if parsed_args["cartesian"]
