@@ -1,6 +1,6 @@
 module Utils
 # Module containing the necessary structs and functions for LIIC execution
-using DelimitedFiles
+
 using LinearAlgebra
 using Statistics
 using Formatting

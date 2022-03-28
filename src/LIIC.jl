@@ -1,23 +1,16 @@
-# Julia LIIC Script
+# Julia LIIC & other useful scripts
 # Written on 26 November 2019
-# Update on 22 February 2022
+# Update on 28 March 2022
 # Execute by running `julia liic.jl --flags path_to_geom1 path_to_geom2`
 
-using LinearAlgebra
 using ArgParse
-
-using DelimitedFiles
 
 include("utils.jl")
 import .Utils
-# import .Utils.Conversion
-# import .Utils.Interpollation
-# import .Utils.Kabsc
 
 # include("interpol.jl")
 # include("kabsch.jl")
 # include("converter.jl")
-
 # using .Interpol, .Kabsch, .Converter
 
 parse_settings = ArgParseSettings()
@@ -36,6 +29,10 @@ parse_settings = ArgParseSettings()
         help = "Number of steps between structures in interpolation"
         arg_type = Int
         default = 10
+    "--output", "-o"
+        help = "Path to output .xyz file of the LIIC"
+        arg_type = String
+        default = "liic_output.xyz"
     "--kabsch", "-k"
         help = "Whether kabsch should run before interpolation"
         action = :store_true
@@ -50,6 +47,7 @@ end
 function main()
     parsed_args = parse_args(ARGS, parse_settings)
     stp = parsed_args["steps"]
+    file = parsed_args["output"]
     in_file_1 = parsed_args["geom1"]
     in_file_2 = parsed_args["geom2"]
 # Perform kabsch algorithm on geom2 if kabsch==True
@@ -78,9 +76,7 @@ function main()
         println("ERROR")
     end
 
-    f = "liic_output.xyz"
-
-    Utils.write_liic(outputArray,f)
+    Utils.write_liic(outputArray,file)
 
 end
 
