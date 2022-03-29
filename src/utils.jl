@@ -44,11 +44,11 @@ function optimal_rotation_matrix(CCmatrix)
     return ORmatrix
 end
 
-function kabsch_rotate(Pxyz,Qxyz)
+function kabsch_rotate(Pgeom,Qgeom)
     # Returns the two geometries in xyz format, one of which has been translated, the
     # other translated and rotated 
-    Pgeom = import_molecule(Pxyz)
-    Qgeom = import_molecule(Qxyz)
+    # Pgeom = import_molecule(Pxyz)
+    # Qgeom = import_molecule(Qxyz)
 
     normalisedP = (translate_to_centroid(Pgeom.Coord))
     normalisedQ = (translate_to_centroid(Qgeom.Coord))
@@ -68,7 +68,10 @@ function kabsch_rotate(Pxyz,Qxyz)
 
     println("The RMSD between these two structures is ",RMSD_value)
 
-    return rotated, normalisedQ
+    RotatedP = Molecule(Pgeom.Atoms,rotated,num_atoms)
+    NormalisedQ = Molecule(Qgeom.Atoms,normalisedQ,num_atoms)
+
+    return RotatedP, NormalisedQ
 end
 
 function import_molecule(xyz_file::String)
@@ -329,6 +332,39 @@ function internal_babel(int_arr_1,int_arr_2,steps,header)
 		interXYZ[:,:,j] = just_coords
 	end
 	return interXYZ, atom_names
+end
+
+function internal(zmat_f::ZMatrix,zmat_l::ZMatrix,steps::Int64)
+	int_f = zmat_f.IntVars
+	int_l = zmat_l.IntVars
+	natoms = zmat_l.Number
+	nvars = length(zmat_l.IntVars)
+	difference = Vector(undef,nvars)
+	for i in 1:nvars
+		toAngle = (zmat_l.IntVars[i]+180.)
+		fromAngle = (zmat_f.IntVars[i]+180.)
+		diff = abs(toAngle - fromAngle)
+		if diff < 180.
+			difference[i] = toAngle - fromAngle
+		else
+			if fromAngle > toAngle
+				fromAngle = fromAngle - 360.
+				difference[i] = toAngle - fromAngle
+			elseif toAngle > fromAngle
+				toAngle = toAngle - 360.
+				difference[i] = toAngle - fromAngle
+			end
+		end
+	end
+	difference = difference / (steps-1)
+	liic = Array{Float64,2}(undef,nvars,steps)
+	arrayOfMolecules = Array{Molecule, 1}(undef, steps)
+	for step in 1:steps
+		liic[:,step] = int_f + (step-1)*difference
+		arrayOfMolecules[step] = zmat_to_xyz(ZMatrix(zmat_f.Atoms,liic[:,step],zmat_f.VarNames,natoms))
+	end
+	# @assert isapprox(int_l,liic[:,steps],atol=1e-5)
+	return arrayOfMolecules
 end
 
 end
