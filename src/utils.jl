@@ -1,15 +1,18 @@
-#Utility to convert between xyz and internal (Z-matrix) coordinates
-module Converter
-"""
-Contains functions that convert between xyz and z-matrix formats to serve as
-input in the LIIC routines.
-"""
+module Utils
+# Module containing the necessary structs and functions for LIIC execution
 
 using LinearAlgebra
+using Statistics
 using Formatting
 
-export xyz_to_zmat, zmat_to_xyz
-export Molecule, ZMatrix
+export import_molecule, write_file
+
+struct ZMatrix
+    Atoms::Vector{String}
+    IntVars::Vector{Float64}
+    VarNames::Vector{String}
+    Number::Int64
+end
 
 struct Molecule
     Atoms::Vector{String}
@@ -17,11 +20,58 @@ struct Molecule
     Number::Int64
 end
 
-struct ZMatrix
-    Atoms::Vector{String}
-    IntVars::Vector{Float64}
-    VarNames::Vector{String}
-    Number::Int64
+function translate_to_centroid(coord_matrix)
+    # Normalises the molecular coordinates by centering them.
+    center = mean(coord_matrix,dims=1)
+    translated_geom = coord_matrix .- center
+    return translated_geom
+end
+
+function optimal_rotation_matrix(CCmatrix)
+    # Returns 3x3 matrix that can be applied to P to get Q
+    # Previous implementation, not general (for cases of non-invertible matrices)
+    # ORmatrix = sqrt(transpose(CCmatrix)*CCmatrix)*inv(CCmatrix)
+    # Using SVD instead
+    u,sing,vt = svd(CCmatrix)
+    if sign(det(transpose(vt)*transpose(u))) == 1.0
+        ORmatrix = transpose(vt)*transpose(u)
+    elseif sign(det(transpose(vt)*transpose(u))) == -1.0
+        mat = [1. 0. 0.;0. 1. 0.; 0. 0. -1.]
+        ORmatrix = transpose(vt)*mat*transpose(u)
+    else
+        println("Error: Issue with SVD routine in finding optimal rotation matrix")
+    end
+    return ORmatrix
+end
+
+function kabsch_rotate(Pgeom,Qgeom)
+    # Returns the two geometries in xyz format, one of which has been translated, the
+    # other translated and rotated 
+    # Pgeom = import_molecule(Pxyz)
+    # Qgeom = import_molecule(Qxyz)
+
+    normalisedP = (translate_to_centroid(Pgeom.Coord))
+    normalisedQ = (translate_to_centroid(Qgeom.Coord))
+    
+    # Calculate cross covariance matrix
+    xcov = transpose(normalisedP)*normalisedQ
+    orot = optimal_rotation_matrix(xcov)
+    
+    num_atoms = size(normalisedP)[1]
+    rotated = zeros(Float64,num_atoms,3)
+    
+    for i=1:num_atoms
+        rotated[i,:] = orot*normalisedP[i,:]
+    end
+
+    RMSD_value = norm(rotated-normalisedQ)
+
+    println("The RMSD between these two structures is ",RMSD_value)
+
+    RotatedP = Molecule(Pgeom.Atoms,rotated,num_atoms)
+    NormalisedQ = Molecule(Qgeom.Atoms,normalisedQ,num_atoms)
+
+    return RotatedP, NormalisedQ
 end
 
 function import_molecule(xyz_file::String)
@@ -125,6 +175,14 @@ function write_xyz(mol::Molecule,io=nothing)
     end
 end
 
+function write_liic(outArray,filename::String)
+    io = open(filename,"w")
+    for i in 1:length(outArray)
+        write_xyz(outArray[i],io)
+    end
+    close(io)
+end
+
 function xyz_to_zmat(molecule)
     natoms     = molecule.Number
     atoms      = molecule.Atoms
@@ -221,6 +279,92 @@ function zmat_to_xyz(zmat::ZMatrix)
     mol=Molecule(zmat.Atoms,atom_coords,natoms)
 
     return mol::Molecule
+end
+
+function cartesian(mol1::Molecule,mol2::Molecule,steps::Int64)
+	"""
+    This function returns an "steps" length array of Molecule objects
+	"""
+    # difference = (mol2.Coord - mol1.Coord) / (steps - 1)
+    natoms = mol1.Number
+	liic = Array{Float64,3}(undef,natoms,3,steps)
+    arrayOfMolecules = Array{Molecule, 1}(undef, steps)
+    for step in 1:steps
+		fracA = (steps-step)/(steps-1)
+		fracB = (step-1)/(steps-1)
+		liic[:,:,step] = mol1.Coord*fracA + mol2.Coord*fracB
+        arrayOfMolecules[step] = Molecule(mol1.Atoms,liic[:,:,step],natoms) 
+    end
+    return arrayOfMolecules
+end
+
+function internal_babel(int_arr_1,int_arr_2,steps,header)
+	"""
+	Takes array of Z-matrix internal coordinates and interpolates between them
+	to return an array of xyzs.
+	"""
+	numInternalCrd = size(int_arr_1)[1]
+	natoms = Int((numInternalCrd + 6)/3)
+	diffVec = Vector(undef,numInternalCrd)
+	for i in 1:numInternalCrd
+		if ( -180. <= (int_arr_2[i,2]-int_arr_1[i,2]) <= 180. )
+			diffVec[i] = (int_arr_2[i,2]-int_arr_1[i,2])/steps
+		elseif (int_arr_2[i,2] - int_arr_1[i,2]) < -180.
+			diffVec[i] = (int_arr_2[i,2] - int_arr_1[i,2] + 360.)/steps
+		elseif (int_arr_2[i,2]-int_arr_1[i,2]) > 180.
+			diffVec[i] = (int_arr_2[i,2] - int_arr_1[i,2] - 360.)/steps
+		else
+			println("Something has gone terribly wrong")
+		end
+	end
+	zmatArray = Vector(undef,steps)
+	interXYZ = Array{Float32,3}(undef,natoms,3,steps)
+	atom_names = Array{String,1}(undef,natoms)
+	for j in 1:steps
+		zmatArray[j] = header * "Variables:\n" * intlVec(int_arr_1,diffVec,j)
+		open("tmp","w") do io
+			write(io,zmatArray[j])
+		end
+		convXyz = read(`obabel -igzmat tmp -oxyz`,String)
+		run(`rm tmp`)
+		just_coords = Array{Float32}(readdlm(IOBuffer(convXyz),skipstart=2)[:,2:4])
+		atom_names = Array{String}(readdlm(IOBuffer(convXyz),skipstart=2)[:,1])
+		interXYZ[:,:,j] = just_coords
+	end
+	return interXYZ, atom_names
+end
+
+function internal(zmat_f::ZMatrix,zmat_l::ZMatrix,steps::Int64)
+	int_f = zmat_f.IntVars
+	int_l = zmat_l.IntVars
+	natoms = zmat_l.Number
+	nvars = length(zmat_l.IntVars)
+	difference = Vector(undef,nvars)
+	for i in 1:nvars
+		toAngle = (zmat_l.IntVars[i]+180.)
+		fromAngle = (zmat_f.IntVars[i]+180.)
+		diff = abs(toAngle - fromAngle)
+		if diff < 180.
+			difference[i] = toAngle - fromAngle
+		else
+			if fromAngle > toAngle
+				fromAngle = fromAngle - 360.
+				difference[i] = toAngle - fromAngle
+			elseif toAngle > fromAngle
+				toAngle = toAngle - 360.
+				difference[i] = toAngle - fromAngle
+			end
+		end
+	end
+	difference = difference / (steps-1)
+	liic = Array{Float64,2}(undef,nvars,steps)
+	arrayOfMolecules = Array{Molecule, 1}(undef, steps)
+	for step in 1:steps
+		liic[:,step] = int_f + (step-1)*difference
+		arrayOfMolecules[step] = zmat_to_xyz(ZMatrix(zmat_f.Atoms,liic[:,step],zmat_f.VarNames,natoms))
+	end
+	# @assert isapprox(int_l,liic[:,steps],atol=1e-5)
+	return arrayOfMolecules
 end
 
 end
