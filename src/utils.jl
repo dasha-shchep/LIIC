@@ -5,7 +5,7 @@ using LinearAlgebra
 using Statistics
 using Formatting
 
-export ZMatrix, Molecule, import_molecule, write_file
+export import_molecule, write_file
 
 struct ZMatrix
     Atoms::Vector{String}

@@ -11,7 +11,8 @@ import .Utils
 # include("interpol.jl")
 # include("kabsch.jl")
 # include("converter.jl")
-# using .Interpol, .Kabsch, .Converter
+# include("structs.jl")
+# using .Interpol, .Kabsch, .Converter, ..Structs
 
 parse_settings = ArgParseSettings()
 

@@ -3,8 +3,8 @@ module Interpol
 
 using DelimitedFiles
 include("converter.jl")
-
 using .Converter
+
 export cartesian, distance, internal, xyz2matrix, writeFile
 
 function cartesian(mol1::Molecule,mol2::Molecule,steps::Int64)
